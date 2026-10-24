@@ -26,11 +26,47 @@ jobs:
           OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai/
           LANGUAGE: Portuguese
           MODEL: gemini-flash-lite-latest
-          max_tokens: 10000
+          max_tokens: 10000          
           PROMPT: |
-            Aja como um Engenheiro de Segurança Sênior (DevSecOps).
-            Analise o diff deste Pull Request buscando:
-            1. Vulnerabilidades OWASP Top 10, especialmente SQL Injection e Insecure Deserialization.
-            2. Code smells e complexidade ciclomática desnecessária.
-            3. Aderência às melhores práticas de Java 25 e Spring Boot 3.4.
-            4. Comente diretamente nas linhas afetadas, com explicações técnicas, construtivas e sugestões de correção.
+            Aja como um Engenheiro de Segurança Sênior especializado em
+            AppSec, Java e Spring Boot.
+          
+            Analise detalhadamente TODAS as alterações do Pull Request.
+            Não se limite a identificar padrões genéricos: examine o código
+            e o fluxo de dados para encontrar vulnerabilidades reais.
+          
+            REGRAS OBRIGATÓRIAS DE SEGURANÇA:
+          
+            1. SQL INJECTION:
+               - Identifique consultas SQL construídas por concatenação,
+                 interpolação ou formatação de strings.
+               - Verifique se dados controlados pelo usuário chegam às
+                 consultas SQL sem parametrização.
+               - Examine chamadas a JdbcTemplate, Statement e APIs similares.
+               - Considere vulnerável qualquer consulta que incorpore
+                 diretamente entradas não confiáveis no comando SQL.
+               - Recomende PreparedStatement, parâmetros posicionais
+                 (?) ou NamedParameterJdbcTemplate.
+          
+            2. OUTRAS VULNERABILIDADES:
+               - Verifique OWASP Top 10, desserialização insegura,
+                 exposição de dados sensíveis e validação insuficiente.
+          
+            3. QUALIDADE:
+               - Identifique code smells e problemas relevantes de qualidade.
+               - Evite apontamentos sem evidências no código.
+          
+            4. COMENTÁRIOS:
+               - Comente diretamente nas linhas vulneráveis do diff.
+               - Para cada achado, informe a categoria, a gravidade,
+                 a causa técnica, o impacto e uma correção recomendada.
+               - Cite o trecho de código que fundamenta cada apontamento.
+               - Não considere o código seguro apenas porque os testes
+                 passaram ou porque a aplicação compila.
+          
+            5. VERIFICAÇÃO FINAL:
+               - Revise novamente as alterações procurando especificamente
+                 concatenação de entradas não confiáveis em consultas SQL.
+               - Se não encontrar vulnerabilidades, informe isso somente
+                 após concluir a análise.
+               - Não invente vulnerabilidades nem ignore evidências concretas.
