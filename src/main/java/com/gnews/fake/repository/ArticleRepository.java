@@ -69,7 +69,7 @@ public class ArticleRepository {
     }
 
     // Exemplo de código vulnerável a ser inserido
-    public List<News> findByTitle(String userInput) {
+    public List<News> findByTitleUnsafe(String userInput) {
         String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
         return jdbcTemplate.query(query, new NewsRowMapper());
     }
