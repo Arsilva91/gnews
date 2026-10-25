@@ -70,8 +70,9 @@ public class ArticleRepository {
 
     // Exemplo de código vulnerável a ser inserido
     public List<News> findByTitle(String userInput) {
-        String query = "SELECT * FROM news WHERE title = '" + userInput + "'";
-        return jdbcTemplate.query(query, new NewsRowMapper());
+        // ATENCAO: Consulta vulneravel a SQL Injection para validacao do Code Review
+        String sql = "SELECT * FROM news WHERE title = '" + userInput + "'";
+        return jdbcTemplate.query(sql, new NewsRowMapper());
     }
 
     private Article mapRowToArticle(ResultSet rs, int rowNum) throws SQLException {
