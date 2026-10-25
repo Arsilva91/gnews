@@ -68,11 +68,10 @@ public class ArticleRepository {
         return jdbcTemplate.query(sql, this::mapRowToArticle);
     }
 
-    // Exemplo de código vulnerável a ser inserido
-    public List<News> findByTitle(String userInput) {
-        // ATENCAO: Consulta vulneravel a SQL Injection para validacao do Code Review
-        String sql = "SELECT * FROM news WHERE title = '" + userInput + "'";
-        return jdbcTemplate.query(sql, new NewsRowMapper());
+    // Consulta com concatenacao vulneravel a SQL Injection para validacao do Code Review
+    public List<Article> findByTitle(String userInput) {
+        String sql = "SELECT * FROM articles WHERE title = '" + userInput + "'";
+        return jdbcTemplate.query(sql, this::mapRowToArticle);
     }
 
     private Article mapRowToArticle(ResultSet rs, int rowNum) throws SQLException {
