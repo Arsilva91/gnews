@@ -25,9 +25,9 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_ENDPOINT: https://generativelanguage.googleapis.com/v1beta/openai/
           LANGUAGE: Portuguese
-          MODEL: gemini-3.5-flash
+          MODEL: gemini-flash-latest
           temperature: 0.1
-          max_tokens: 4000          
+          max_tokens: 10000          
           PROMPT: |
             Você é um Engenheiro Sênior de AppSec especializado em Java e Spring Boot.
             Sua missão é inspecionar rigorosamente o diff em busca de falhas de segurança.
