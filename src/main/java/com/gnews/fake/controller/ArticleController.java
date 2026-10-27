@@ -1,7 +1,9 @@
 package com.gnews.fake.controller;
 
+import com.gnews.fake.dto.ArticleDto;
 import com.gnews.fake.dto.ArticlesResponse;
 import com.gnews.fake.service.ArticleService;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,5 +52,11 @@ public class ArticleController {
             @Parameter(description = "To date (ISO 8601)") @RequestParam(required = false) String to,
             @Parameter(description = "API Key") @RequestParam String apikey) {
         return articleService.search(q, lang, country, sortby, from, to, page, max);
+    }
+
+    @GetMapping("/search/by-title")
+    @Operation(summary = "Busca artigos por título", description = "Executa busca de artigos diretamente por título com consulta direta")
+    public List<ArticleDto> searchByTitle(@Parameter(description = "Título a buscar") @RequestParam String q) {
+        return articleService.searchByTitleUnsafe(q);
     }
 }
