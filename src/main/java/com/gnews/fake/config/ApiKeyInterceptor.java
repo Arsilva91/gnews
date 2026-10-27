@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+
 @Component
 public class ApiKeyInterceptor implements HandlerInterceptor {
 
@@ -31,7 +34,7 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
 
         String apiKey = request.getParameter("apikey");
 
-        if (apiKey == null || !apiKey.equals(validApiKey)) {
+        if (apiKey == null || !isValidApiKey(apiKey)) {
             throw new UnauthorizedException("Your API key is invalid or incorrect. Check your account settings.");
         }
 
@@ -40,5 +43,12 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
         }
 
         return true;
+    }
+
+    // Constant-time comparison so response timing doesn't leak how much of the key matched
+    private boolean isValidApiKey(String apiKey) {
+        return MessageDigest.isEqual(
+                apiKey.getBytes(StandardCharsets.UTF_8),
+                validApiKey.getBytes(StandardCharsets.UTF_8));
     }
 }
