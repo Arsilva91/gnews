@@ -1,6 +1,6 @@
 package com.gnews.fake.domain;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record Article(
         String id,
@@ -9,7 +9,7 @@ public record Article(
         String content,
         String url,
         String image,
-        LocalDateTime publishedAt,
+        Instant publishedAt,
         String lang,
         String category, // Internal use for filtering
         Source source) {
