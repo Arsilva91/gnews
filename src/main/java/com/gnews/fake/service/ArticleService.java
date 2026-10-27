@@ -7,10 +7,9 @@ import com.gnews.fake.dto.SourceDto;
 import com.gnews.fake.repository.ArticleRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -18,7 +17,8 @@ import java.util.function.Predicate;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+            .withZone(ZoneOffset.UTC);
 
     public ArticleService(ArticleRepository articleRepository) {
         this.articleRepository = articleRepository;
@@ -42,7 +42,7 @@ public class ArticleService {
                     a.description().toLowerCase().contains(query));
         }
 
-        return fetchAndMap(predicate, Comparator.comparing(Article::publishedAt).reversed(), page, max);
+        return fetchAndMap(predicate, page, max);
     }
 
     public ArticlesResponse search(String q, String lang, String country, String sortBy,
@@ -64,48 +64,36 @@ public class ArticleService {
         }
         // Date filtering (simplified parsing)
         if (from != null && !from.isBlank()) {
-            LocalDateTime fromDate = LocalDateTime.parse(from, DateTimeFormatter.ISO_DATE_TIME);
+            Instant fromDate = Instant.parse(from);
             predicate = predicate.and(a -> a.publishedAt().isAfter(fromDate));
         }
         if (to != null && !to.isBlank()) {
-            LocalDateTime toDate = LocalDateTime.parse(to, DateTimeFormatter.ISO_DATE_TIME);
+            Instant toDate = Instant.parse(to);
             predicate = predicate.and(a -> a.publishedAt().isBefore(toDate));
         }
 
-        Comparator<Article> comparator = Comparator.comparing(Article::publishedAt).reversed();
-        if ("relevance".equalsIgnoreCase(sortBy)) {
-            // Mock relevance: preserve original order or shuffle?
-            // Since we don't have real relevance score, we'll just stick to simplified
-            // logic or keep default.
-            // Let's just default to date desc for predictability unless needed.
-        }
-
-        return fetchAndMap(predicate, comparator, page, max);
+        // sortBy=relevance has no real score in the mock, so results stay ordered by date
+        return fetchAndMap(predicate, page, max);
     }
 
-    public List<ArticleDto> searchByTitleUnsafe(String title) {
+    public List<ArticleDto> searchByTitle(String title) {
         return articleRepository.findByTitle(title).stream()
                 .map(this::mapToDto)
                 .toList();
     }
 
-    private ArticlesResponse fetchAndMap(Predicate<Article> predicate, Comparator<Article> comparator, int page,
-            int max) {
+    private ArticlesResponse fetchAndMap(Predicate<Article> predicate, int page, int max) {
         List<Article> filtered = articleRepository.findAll().stream()
                 .filter(predicate)
-                .sorted(comparator)
                 .toList();
 
         int total = filtered.size();
-        // Validation for pagination
-        int pageNum = Math.max(1, page);
-        int pageSize = Math.max(1, Math.min(100, max)); // cap max at 100
-
-        int skip = (pageNum - 1) * pageSize;
+        // long avoids int overflow on very large page numbers
+        long skip = (long) (page - 1) * max;
 
         List<ArticleDto> resultDtos = filtered.stream()
                 .skip(skip)
-                .limit(pageSize)
+                .limit(max)
                 .map(this::mapToDto)
                 .toList();
 
@@ -120,7 +108,7 @@ public class ArticleService {
                 article.content(),
                 article.url(),
                 article.image(),
-                article.publishedAt().atZone(ZoneOffset.UTC).format(ISO_FORMATTER),
+                ISO_FORMATTER.format(article.publishedAt()),
                 article.lang(),
                 new SourceDto(
                         article.source().id(),
