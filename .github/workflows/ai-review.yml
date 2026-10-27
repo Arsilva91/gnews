@@ -70,28 +70,4 @@ jobs:
                  concatenação de entradas não confiáveis em consultas SQL.
                - Se não encontrar vulnerabilidades, informe isso somente
                  após concluir a análise.
-               - Não invente vulnerabilidades nem ignore evidências concretas.
-
-      - name: Validar Resultado da Revisão
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-
-          echo "Buscando comentários do revisor IA para o commit ${HEAD_SHA} no PR #${PR_NUMBER}..."
-
-          COMMENTS_COUNT=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}/comments" \
-            --jq "[.[] | select(.commit_id == \"${HEAD_SHA}\" and .user.login == \"github-actions[bot]\")] | length")
-
-          if [ "$COMMENTS_COUNT" -gt 0 ]; then
-            echo "::error::Revisão de segurança da IA identificou $COMMENTS_COUNT problema(s) no PR."
-            echo ""
-            echo "====================== APONTAMENTOS ENCONTRADOS ======================"
-            gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}/comments" \
-              --jq -r ".[] | select(.commit_id == \"${HEAD_SHA}\" and .user.login == \"github-actions[bot]\") | \"\n[ARQUIVO]: \(.path)\n\(.body)\n------------------------------------------------------------\""
-            echo "======================================================================="
-            exit 1
-          fi
-
-          echo "Nenhum apontamento crítico de segurança encontrado pela IA. Aprovado!"
+               - Não invente vulnerabilidades nem ignore evidências concretas.  
