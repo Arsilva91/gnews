@@ -7,7 +7,7 @@ import com.gnews.fake.dto.SourceDto;
 import com.gnews.fake.repository.ArticleRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -18,7 +18,8 @@ import java.util.function.Predicate;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+            .withZone(ZoneOffset.UTC);
 
     public ArticleService(ArticleRepository articleRepository) {
         this.articleRepository = articleRepository;
@@ -64,11 +65,11 @@ public class ArticleService {
         }
         // Date filtering (simplified parsing)
         if (from != null && !from.isBlank()) {
-            LocalDateTime fromDate = LocalDateTime.parse(from, DateTimeFormatter.ISO_DATE_TIME);
+            Instant fromDate = Instant.parse(from);
             predicate = predicate.and(a -> a.publishedAt().isAfter(fromDate));
         }
         if (to != null && !to.isBlank()) {
-            LocalDateTime toDate = LocalDateTime.parse(to, DateTimeFormatter.ISO_DATE_TIME);
+            Instant toDate = Instant.parse(to);
             predicate = predicate.and(a -> a.publishedAt().isBefore(toDate));
         }
 
@@ -114,7 +115,7 @@ public class ArticleService {
                 article.content(),
                 article.url(),
                 article.image(),
-                article.publishedAt().atZone(ZoneOffset.UTC).format(ISO_FORMATTER),
+                ISO_FORMATTER.format(article.publishedAt()),
                 article.lang(),
                 new SourceDto(
                         article.source().id(),
