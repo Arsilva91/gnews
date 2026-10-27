@@ -92,15 +92,12 @@ public class ArticleService {
                 .toList();
 
         int total = filtered.size();
-        // Validation for pagination
-        int pageNum = Math.max(1, page);
-        int pageSize = Math.max(1, Math.min(100, max)); // cap max at 100
-
-        int skip = (pageNum - 1) * pageSize;
+        // long avoids int overflow on very large page numbers
+        long skip = (long) (page - 1) * max;
 
         List<ArticleDto> resultDtos = filtered.stream()
                 .skip(skip)
-                .limit(pageSize)
+                .limit(max)
                 .map(this::mapToDto)
                 .toList();
 
