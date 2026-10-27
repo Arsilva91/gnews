@@ -6,7 +6,8 @@ import com.gnews.fake.repository.ArticleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -108,8 +109,8 @@ public class DataInitializer implements CommandLineRunner {
                                         content,
                                         "https://news.example.com/articles/" + (i + 1),
                                         image,
-                                        LocalDateTime.now().minusHours(random.nextInt(24 * 30)), // Random time in last
-                                                                                                 // 30 days
+                                        Instant.now().minus(Duration.ofHours(random.nextInt(24 * 30))), // Random time in last
+                                                                                                         // 30 days
                                         lang,
                                         category,
                                         new Source(
