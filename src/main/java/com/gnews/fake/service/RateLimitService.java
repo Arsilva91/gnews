@@ -17,13 +17,7 @@ public class RateLimitService {
     private final Map<String, Integer> requestCounts = new ConcurrentHashMap<>();
 
     public boolean allowRequest(String apiKey) {
-        requestCounts.putIfAbsent(apiKey, 0);
-        int current = requestCounts.get(apiKey);
-        if (current >= dailyLimit) {
-            return false;
-        }
-        requestCounts.put(apiKey, current + 1);
-        return true;
+        return requestCounts.merge(apiKey, 1, Integer::sum) <= dailyLimit;
     }
 
     // Reset counts every day at midnight (simulation)
