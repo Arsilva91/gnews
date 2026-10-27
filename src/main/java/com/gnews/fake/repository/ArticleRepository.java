@@ -43,7 +43,7 @@ public class ArticleRepository {
                 ps.setString(4, article.content());
                 ps.setString(5, article.url());
                 ps.setString(6, article.image());
-                ps.setTimestamp(7, article.publishedAt() != null ? Timestamp.valueOf(article.publishedAt()) : null);
+                ps.setTimestamp(7, article.publishedAt() != null ? Timestamp.from(article.publishedAt()) : null);
                 ps.setString(8, article.lang());
                 ps.setString(9, article.category());
 
@@ -64,14 +64,13 @@ public class ArticleRepository {
     }
 
     public List<Article> findAll() {
-        String sql = "SELECT * FROM articles";
+        String sql = "SELECT * FROM articles ORDER BY published_at DESC";
         return jdbcTemplate.query(sql, this::mapRowToArticle);
     }
 
-    // Consulta com concatenacao vulneravel a SQL Injection para validacao do Code Review
-    public List<Article> findByTitle(String userInput) {
-        String sql = "SELECT * FROM articles WHERE title = '" + userInput + "'";
-        return jdbcTemplate.query(sql, this::mapRowToArticle);
+    public List<Article> findByTitle(String title) {
+        String sql = "SELECT * FROM articles WHERE title = ?";
+        return jdbcTemplate.query(sql, this::mapRowToArticle, title);
     }
 
     private Article mapRowToArticle(ResultSet rs, int rowNum) throws SQLException {
@@ -91,7 +90,7 @@ public class ArticleRepository {
             rs.getString("content"),
             rs.getString("url"),
             rs.getString("image"),
-            publishedAtTimestamp != null ? publishedAtTimestamp.toLocalDateTime() : null,
+            publishedAtTimestamp != null ? publishedAtTimestamp.toInstant() : null,
             rs.getString("lang"),
             rs.getString("category"),
             source
