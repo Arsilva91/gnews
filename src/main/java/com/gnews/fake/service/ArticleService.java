@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -43,7 +42,7 @@ public class ArticleService {
                     a.description().toLowerCase().contains(query));
         }
 
-        return fetchAndMap(predicate, Comparator.comparing(Article::publishedAt).reversed(), page, max);
+        return fetchAndMap(predicate, page, max);
     }
 
     public ArticlesResponse search(String q, String lang, String country, String sortBy,
@@ -73,22 +72,13 @@ public class ArticleService {
             predicate = predicate.and(a -> a.publishedAt().isBefore(toDate));
         }
 
-        Comparator<Article> comparator = Comparator.comparing(Article::publishedAt).reversed();
-        if ("relevance".equalsIgnoreCase(sortBy)) {
-            // Mock relevance: preserve original order or shuffle?
-            // Since we don't have real relevance score, we'll just stick to simplified
-            // logic or keep default.
-            // Let's just default to date desc for predictability unless needed.
-        }
-
-        return fetchAndMap(predicate, comparator, page, max);
+        // sortBy=relevance has no real score in the mock, so results stay ordered by date
+        return fetchAndMap(predicate, page, max);
     }
 
-    private ArticlesResponse fetchAndMap(Predicate<Article> predicate, Comparator<Article> comparator, int page,
-            int max) {
+    private ArticlesResponse fetchAndMap(Predicate<Article> predicate, int page, int max) {
         List<Article> filtered = articleRepository.findAll().stream()
                 .filter(predicate)
-                .sorted(comparator)
                 .toList();
 
         int total = filtered.size();

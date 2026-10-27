@@ -4,6 +4,7 @@ import com.gnews.fake.domain.Article;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -13,6 +14,8 @@ public class ArticleRepository {
 
     public void saveAll(List<Article> newArticles) {
         articles.addAll(newArticles);
+        // Sorted once on write so reads don't need to sort on every request
+        articles.sort(Comparator.comparing(Article::publishedAt).reversed());
     }
 
     public List<Article> findAll() {
